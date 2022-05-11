@@ -1,0 +1,5 @@
+all:
+  hosts:
+    remote-server:
+      ansible_ssh_host: ip adress
+      ansible_ssh_user: root

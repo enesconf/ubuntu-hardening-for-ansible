@@ -1,0 +1,48 @@
+- name: Ubuntu Hardining on Ansible playbook
+  hosts: remote-server
+  gather_facts: false
+  vars_files: 
+    - file.vars
+  tasks:
+      - name: Create a login user
+        user:
+          name: "{{ user }}"
+          password: "{{ password }}"
+          groups:
+            - wheel
+          state: present
+
+      - name: Deny root from logging in
+        lineinfile:
+          dest: /etc/ssh/sshd_config
+          regexp: '^(#)?PermitRootLogin \w*$'
+          line: 'PermitRootLogin no'
+          state: present
+
+      - name: Allow specific users to log in
+        lineinfile:
+          dest: /etc/ssh/sshd_config
+          regexp: '^AllowUsers'
+          line: 'AllowUsers {{ user }}'
+          state: present
+
+      - name: Add {{ user }} to sudoers file
+        lineinfile:
+          path: /etc/sudoers
+          regexp: '^{{ user }}'
+          line: '{{ user }} ALL=(ALL) NOPASSWD: ALL'
+          validate: 'visudo -cf %s'
+      
+      - name: Deny to X11Forwarding
+        lineinfile:
+          path: /etc/ssh/sshd_config
+          regexp: ^(#)?X11Forwarding \w*$'
+          line: 'X11Forwarding no'
+          state: present
+
+      - name: Deny to X11Forwarding
+        lineinfile:
+          path: /etc/ssh/sshd_config
+          regexp: ^(#)?Banner \w*$'
+          line: 'Banner no'
+          state: present
